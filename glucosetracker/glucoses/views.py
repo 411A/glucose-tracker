@@ -399,9 +399,24 @@ class GlucoseDeleteView(LoginRequiredMixin, DeleteView):
 class GlucoseListJson(LoginRequiredMixin, BaseDatatableView):
     model = Glucose
 
-    columns = ['value', 'category', 'record_date', 'record_time',
-               'notes', 'tags', 'delete']
-    order_columns = ['value', 'category', 'record_date', 'record_time', 'notes']
+    columns = [
+        'value',
+        'category',
+        'record_date',
+        'record_time',
+        'notes',
+        'tags',
+        'actions',
+    ]
+
+    order_columns = [
+        'value',
+        'category',
+        'record_date',
+        'record_time',
+        'notes',
+    ]
+
     max_display_length = 500
 
     def render_column(self, row, column):
@@ -433,11 +448,14 @@ class GlucoseListJson(LoginRequiredMixin, BaseDatatableView):
             return row.record_time.strftime('%I:%M %p')
         elif column == 'tags':
             return ', '.join([t.name for t in row.tags.all()])
-        elif column == 'delete':
+        elif column == 'actions':
+            edit_url = reverse('glucose_update', args=(row.id,))
+            edit_link = '<a href="%s"><i class="fa fa-pencil text-warning">' \
+                        '</i></a>' % edit_url
             delete_url = reverse('glucose_delete', args=(row.id,))
-            delete_link = '<a href="%s"><i class="fa fa-times text-danger">' \
+            delete_link = '<a href="%s"><i class="fa fa-trash text-danger">' \
                           '</i></a>' % delete_url
-            return '<center>%s</center>' % delete_link
+            return '<center>%s&nbsp;&nbsp%s</center>' % (edit_link, delete_link)
         else:
             return super(GlucoseListJson, self).render_column(row, column)
 
